@@ -110,7 +110,7 @@
 
 <h3 id="install_operator">Install the Operator</h3>
 <div class="section">
-<p>To run the examples below, you will need to have installed the Coherence Operator, do this using whatever method you prefer from the <a id="" title="" target="_blank" href="https://oracle.github.io/coherence-operator/docs/latest/#/installation/01_installation">Installation Guide</a></p>
+<p>To run the examples below, you will need to have installed the Coherence Operator, do this using whatever method you prefer from the <a id="" title="" target="_blank" href="https://oracle.github.io/coherence-operator/docs/latest/#/docs/installation/01_installation">Installation Guide</a></p>
 
 </div>
 
@@ -714,7 +714,7 @@ lang="json"
   "refreshTime": "2021-03-07T12:27:20.193Z",
   "licenseMode": "Development",
   "localMemberId": 1,
-  "version": "21.12.1",
+  "version": "22.06",
   "running": true,
   "clusterName": "test-cluster",
   "membersDepartureCount": 0,
@@ -1002,7 +1002,7 @@ lang="bash"
 <markup
 
 
->2021-03-07 12:53:13.481/1.992 Oracle Coherence CE 21.12.1 &lt;Error&gt; (thread=main, member=n/a): Error while starting service "Proxy": com.tangosol.net.messaging.ConnectionException: could not establish a connection to one of the following addresses: []</markup>
+>2021-03-07 12:53:13.481/1.992 Oracle Coherence CE 22.06 &lt;Error&gt; (thread=main, member=n/a): Error while starting service "Proxy": com.tangosol.net.messaging.ConnectionException: could not establish a connection to one of the following addresses: []</markup>
 
 <p>This tells us that the client failed to connect to the cluster, because the client is not using TLS.</p>
 

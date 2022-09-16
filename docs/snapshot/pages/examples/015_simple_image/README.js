@@ -1,6 +1,6 @@
 <doc-view>
 
-<h2 id="_example_coherence_server_image">Example Coherence Server Image</h2>
+<h2 id="_example_coherence_image_using_jib">Example Coherence Image using JIB</h2>
 <div class="section">
 <p>This example shows how to build a simple Coherence server image using
 <a id="" title="" target="_blank" href="https://github.com/GoogleContainerTools/jib/blob/master/README.md">JIB</a> with either Maven or Gradle.
@@ -22,7 +22,7 @@ When building with Gradle the project uses the <a id="" title="" target="_blank"
 <div class="section">
 <p>To build a Coherence application there will obviously be at a minimum a dependency on <code>coherence.jar</code>.
 Optionally we can also add dependencies on other Coherence modules.
-In this example we&#8217;re going to add management over REST to the application by adding a dependency on <code>coherence-management</code>.</p>
+In this example we&#8217;re going to add json support to the application by adding a dependency on <code>coherence-json</code>.</p>
 
 <p>In the example we use the <code>coherence-bom</code> which ensures that we have consistent use of other Coherence modules.
 In the <code>pom.xml</code> we have a <code>dependencyManagement</code> section.</p>
@@ -48,9 +48,9 @@ title="pom.xml"
 lang="groovy"
 title="build.gradle"
 >dependencies {
-    implementation platform("com.oracle.coherence.ce:coherence-bom:21.12.1")</markup>
+    implementation platform("com.oracle.coherence.ce:coherence-bom:22.06.1")</markup>
 
-<p>We can then add the <code>coherence</code> and <code>coherence-management</code> modules as dependencies</p>
+<p>We can then add the <code>coherence</code> and <code>coherence-json</code> modules as dependencies</p>
 
 <markup
 lang="xml"
@@ -62,7 +62,7 @@ title="pom.xml"
         &lt;/dependency&gt;
         &lt;dependency&gt;
             &lt;groupId&gt;com.oracle.coherence.ce&lt;/groupId&gt;
-            &lt;artifactId&gt;coherence-management&lt;/artifactId&gt;
+            &lt;artifactId&gt;coherence-json&lt;/artifactId&gt;
         &lt;/dependency&gt;
     &lt;/dependencies&gt;</markup>
 
@@ -72,10 +72,10 @@ title="pom.xml"
 lang="groovy"
 title="build.gradle"
 >dependencies {
-    implementation platform("com.oracle.coherence.ce:coherence-bom:21.12.1")
+    implementation platform("com.oracle.coherence.ce:coherence-bom:22.06.1")
 
     implementation "com.oracle.coherence.ce:coherence"
-    implementation "com.oracle.coherence.ce:coherence-management"
+    implementation "com.oracle.coherence.ce:coherence-json"
 }</markup>
 
 </div>
@@ -135,7 +135,7 @@ title="pom.xml"
     &lt;version&gt;${version.plugin.jib}&lt;/version&gt;
     &lt;configuration&gt;
         &lt;from&gt;
-            &lt;image&gt;gcr.io/distroless/java11&lt;/image&gt;    <span class="conum" data-value="1" />
+            &lt;image&gt;gcr.io/distroless/java11-debian11&lt;/image&gt;    <span class="conum" data-value="1" />
         &lt;/from&gt;
         &lt;to&gt;
             &lt;image&gt;${project.artifactId}&lt;/image&gt;        <span class="conum" data-value="2" />
@@ -152,7 +152,7 @@ title="pom.xml"
 &lt;/plugin&gt;</markup>
 
 <ul class="colist">
-<li data-value="1">The base image will be <code>gcr.io/distroless/java11</code></li>
+<li data-value="1">The base image will be <code>gcr.io/distroless/java11-debian11</code></li>
 <li data-value="2">The image name is set to the Maven module name using the property <code>${project.artifactId}</code></li>
 <li data-value="3">There will be two tags for the image, <code>latest</code> and the project version taken from the <code>${project.version}</code> property.</li>
 <li data-value="4">The main class to use when the image is run is set to <code>com.tangosol.net.Coherence</code></li>
@@ -169,7 +169,7 @@ lang="groovy"
 title="build.gradle"
 >jib {
   from {
-    image = 'gcr.io/distroless/java11'    <span class="conum" data-value="1" />
+    image = 'gcr.io/distroless/java11-debian11'    <span class="conum" data-value="1" />
   }
   to {
     image = "${project.name}"              <span class="conum" data-value="2" />
@@ -182,7 +182,7 @@ title="build.gradle"
 }</markup>
 
 <ul class="colist">
-<li data-value="1">The base image will be <code>gcr.io/distroless/java11</code></li>
+<li data-value="1">The base image will be <code>gcr.io/distroless/java11-debian11</code></li>
 <li data-value="2">The image name is set to the Maven module name using the property <code>${project.artifactId}</code></li>
 <li data-value="3">There will be two tags for the image, <code>latest</code> and the project version taken from the <code>${project.version}</code> property.</li>
 <li data-value="4">The main class to use when the image is run is set to <code>com.tangosol.net.Coherence</code></li>

@@ -11,6 +11,10 @@ This page will be updated and maintained over time to include common issues we s
 <div class="section">
 <ul class="ulist">
 <li>
+<p><router-link to="#no-operator" @click.native="this.scrollFix('#no-operator')">I Uninstalled the Operator and Cannot Delete the Coherence Clusters</router-link></p>
+
+</li>
+<li>
 <p><router-link to="#restart" @click.native="this.scrollFix('#restart')">Why Does the Operator Pod Restart</router-link></p>
 
 </li>
@@ -34,11 +38,38 @@ This page will be updated and maintained over time to include common issues we s
 <p><router-link to="#dashboards" @click.native="this.scrollFix('#dashboards')">My Grafana Dashboards do not display any metrics</router-link></p>
 
 </li>
+<li>
+<p><router-link to="#arm-java8" @click.native="this.scrollFix('#arm-java8')">I&#8217;m using Arm64 and Java 8 and the JVM will not start due to using G1GC</router-link></p>
+
+</li>
 </ul>
 </div>
 
 <h2 id="_issues">Issues</h2>
 <div class="section">
+
+<h3 id="no-operator">I Uninstalled the Operator and Cannot Delete the Coherence Clusters</h3>
+<div class="section">
+<p>The <code>Coherence</code> resources managed by the Operator are marked in k8s as being owned by the Operator, and have finalizers to stop them being deleted. In normal operation the Operator will remove the finalizer when it deletes a <code>Coherence</code> cluster. The Operator also installs a validating and mutating web-hook, which will also stop k8s allowing mutations and deletions to a <code>Coherence</code> resource if the Coherence Operator is not running.</p>
+
+<p>If the Operator has been uninstalled, first remove the two web-hooks.</p>
+
+<markup
+lang="bash"
+
+>kubectl delete mutatingwebhookconfiguration coherence-operator-mutating-webhook-configuration
+kubectl delete validatingwebhookconfiguration coherence-operator-validating-webhook-configuration</markup>
+
+<p>Now patch and delete each Coherence resource to delete its finalizers using the command below and replacing <code>&lt;NAMESPACE&gt;</code> with the correct namespace the <code>Coherence</code> resource is in and <code>&lt;COHERENCE_RESOURCE_NAME&gt;</code> with the
+<code>Coherence</code> resource name.</p>
+
+<markup
+lang="bash"
+
+>kubectl -n &lt;NAMESPACE&gt; patch coherence/&lt;COHERENCE_RESOURCE_NAME&gt; -p '{"metadata":{"finalizers":[]}}' --type=merge
+kubectl -n &lt;NAMESPACE&gt; delete coherence/&lt;COHERENCE_RESOURCE_NAME&gt;</markup>
+
+</div>
 
 <h3 id="restart">Why Does the Operator Pod Restart After Installation</h3>
 <div class="section">
@@ -164,6 +195,19 @@ Microprofile format.
 If the metric name has no <code>vendor</code> prefix then it is using Micrometer metrics.</p>
 
 <p>See: the <router-link to="/docs/metrics/030_importing">Importing Grafana Dashboards</router-link> documentation.</p>
+
+</div>
+
+<h3 id="arm-java8">I&#8217;m using Arm64 and Java 8 and the JVM will not start due to using G1GC</h3>
+<div class="section">
+<p>If running Kubernetes on ARM processors and using Coherence images built on Java 8 for ARM,
+note that the G1 garbage collector in that version of Java on ARM is marked as experimental.</p>
+
+<p>By default, the Operator configures the Coherence JVM to use G1.
+This will cause errors on Arm64 Java 8 JMS unless the JVM option <code>-XX:+UnlockExperimentalVMOptions</code> is
+added in the Coherence resource spec (see <router-link to="/docs/jvm/030_jvm_args">Adding Arbitrary JVM Arguments</router-link>).
+Alternatively specify a different garbage collector, ideally on a version of Java this old, use CMS
+(see <router-link to="/docs/jvm/040_gc">Garbage Collector Settings</router-link>).</p>
 
 </div>
 </div>
