@@ -1,0 +1,124 @@
+apiVersion: coherence.oracle.com/v1
+kind: Coherence
+metadata:
+  name: storage
+spec:
+  replicas: 3
+  image: ${TEST_APPLICATION_IMAGE}
+  imagePullPolicy: ${TEST_IMAGE_PULL_POLICY}
+  cluster: idrs-test
+  coherence:
+    management:
+      enabled: true
+  jvm:
+    args:
+      - "-Dcoherence.management=local-only"
+    memory:
+      maxRAM: 2g
+      maxHeapSize: 1g
+  resources:
+    requests:
+      cpu: 250m
+    limits:
+      cpu: 1
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 15
+---
+apiVersion: coherence.oracle.com/v1
+kind: Coherence
+metadata:
+  name: subscriber
+spec:
+  replicas: 3
+  image: ${TEST_APPLICATION_IMAGE}
+  imagePullPolicy: ${TEST_IMAGE_PULL_POLICY}
+  cluster: idrs-test
+  coherence:
+    storageEnabled: false
+    management:
+      enabled: true
+  application:
+    main: com.oracle.coherence.idrs.SubscriberMain
+  jvm:
+    args:
+      - "-Dcoherence.management=local-only"
+    memory:
+      maxRAM: 2g
+      maxHeapSize: 1g
+  resources:
+    requests:
+      cpu: 250m
+    limits:
+      cpu: 1
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 15
+  startQuorum:
+    - deployment: storage
+---
+apiVersion: coherence.oracle.com/v1
+kind: Coherence
+metadata:
+  name: tracker
+spec:
+  replicas: 1
+  image: ${TEST_APPLICATION_IMAGE}
+  imagePullPolicy: ${TEST_IMAGE_PULL_POLICY}
+  cluster: idrs-test
+  coherence:
+    storageEnabled: false
+    metrics:
+      enabled: true
+    management:
+      enabled: true
+  application:
+    main: com.oracle.coherence.idrs.TrackerMain
+  jvm:
+    args:
+      - "-Dcoherence.management=all"
+    memory:
+      maxRAM: 2g
+      maxHeapSize: 1g
+  env:
+    - name: COHERENCE_M
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 15
+  ports:
+    - name: management
+  startQuorum:
+    - deployment: storage
+---
+apiVersion: coherence.oracle.com/v1
+kind: Coherence
+metadata:
+  name: publisher
+spec:
+  replicas: 1
+  image: ${TEST_APPLICATION_IMAGE}
+  imagePullPolicy: ${TEST_IMAGE_PULL_POLICY}
+  cluster: idrs-test
+  coherence:
+    storageEnabled: false
+    management:
+      enabled: true
+  application:
+    main: com.oracle.coherence.idrs.PublisherMain
+  jvm:
+    args:
+      - "-Dcoherence.management=local-only"
+    memory:
+      maxRAM: 2g
+      maxHeapSize: 1g
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 15
+  ports:
+    - name: management
+  env:
+    - name: COHERENCE_TEST_PUBLISH_DELAY
+      value: "5000"
+  startQuorum:
+    - deployment: subscriber
+

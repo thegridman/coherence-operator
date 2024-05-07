@@ -1,0 +1,33 @@
+apiVersion: coherence.oracle.com/v1
+kind: Coherence
+metadata:
+  name: subscriber
+spec:
+  replicas: 3
+  image: ${TEST_APPLICATION_IMAGE}
+  imagePullPolicy: ${TEST_IMAGE_PULL_POLICY}
+  cluster: idrs-test
+  coherence:
+    storageEnabled: false
+    management:
+      enabled: true
+  application:
+    main: com.oracle.coherence.idrs.SubscriberMain
+  jvm:
+    memory:
+      maxRAM: 2g
+      maxHeapSize: 1g
+  resources:
+    requests:
+      cpu: 250m
+    limits:
+      cpu: 1
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 15
+
+
+
+
+
+

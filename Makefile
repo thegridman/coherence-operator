@@ -968,6 +968,49 @@ run-e2e-test: gotestsum  ## Run the Operator 'remote' end-to-end functional test
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# Executes the Go end-to-end tests that require a k8s cluster using
+# a DEPLOYED operator instance (i.e. the operator Docker image is
+# deployed to k8s). These tests will use whichever k8s cluster the
+# local environment is pointing to.
+# ----------------------------------------------------------------------------------------------------------------------
+.PHONY: idrs-test
+idrs-test: export MF = $(MAKEFLAGS)
+idrs-test: prepare-idrs-test ## Run the Operator end-to-end 'IDRS' functional tests using an Operator deployed in k8s
+	$(MAKE) run-idrs-test $${MF} \
+	; rc=$$? \
+	; $(MAKE) undeploy $${MF} \
+	; $(MAKE) delete-namespace $${MF} \
+	; exit $$rc
+
+.PHONY: prepare-idrs-test
+prepare-idrs-test: $(BUILD_TARGETS)/build-operator reset-namespace create-ssl-secrets install-crds deploy-and-wait
+
+.PHONY: run-idrs-test
+run-idrs-test: export CGO_ENABLED = 0
+run-idrs-test: export TEST_SSL_SECRET := $(TEST_SSL_SECRET)
+run-idrs-test: export OPERATOR_NAMESPACE := $(OPERATOR_NAMESPACE)
+run-idrs-test: export CLUSTER_NAMESPACE := $(CLUSTER_NAMESPACE)
+run-idrs-test: export OPERATOR_NAMESPACE_CLIENT := $(OPERATOR_NAMESPACE_CLIENT)
+run-idrs-test: export BUILD_OUTPUT := $(BUILD_OUTPUT)
+run-idrs-test: export TEST_COHERENCE_IMAGE := $(TEST_COHERENCE_IMAGE)
+run-idrs-test: export TEST_IMAGE_PULL_POLICY := $(IMAGE_PULL_POLICY)
+run-idrs-test: export TEST_STORAGE_CLASS := $(TEST_STORAGE_CLASS)
+run-idrs-test: export TEST_ASSET_KUBECTL := $(TEST_ASSET_KUBECTL)
+run-idrs-test: export VERSION := $(VERSION)
+run-idrs-test: export OPERATOR_IMAGE := $(OPERATOR_IMAGE)
+run-idrs-test: export COHERENCE_IMAGE := $(COHERENCE_IMAGE)
+run-idrs-test: export TEST_APPLICATION_IMAGE := $(TEST_APPLICATION_IMAGE)
+run-idrs-test: export TEST_APPLICATION_IMAGE_CLIENT := $(TEST_APPLICATION_IMAGE_CLIENT)
+run-idrs-test: export TEST_APPLICATION_IMAGE_HELIDON := $(TEST_APPLICATION_IMAGE_HELIDON)
+run-idrs-test: export TEST_APPLICATION_IMAGE_SPRING := $(TEST_APPLICATION_IMAGE_SPRING)
+run-idrs-test: export TEST_APPLICATION_IMAGE_SPRING_FAT := $(TEST_APPLICATION_IMAGE_SPRING_FAT)
+run-idrs-test: export TEST_APPLICATION_IMAGE_SPRING_CNBP := $(TEST_APPLICATION_IMAGE_SPRING_CNBP)
+run-idrs-test: gotestsum  ## Run the Operator 'IDRS' end-to-end functional tests using an ALREADY DEPLOYED Operator
+	$(GOTESTSUM) --format standard-verbose --junitfile $(TEST_LOGS_DIR)/operator-idrs-test.xml \
+	  -- $(GO_TEST_FLAGS_E2E) ./test/e2e/idrs/...
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # Run the end-to-end Coherence client tests.
 # ----------------------------------------------------------------------------------------------------------------------
 e2e-client-test: export CGO_ENABLED = 0

@@ -1,0 +1,33 @@
+apiVersion: coherence.oracle.com/v1
+kind: Coherence
+metadata:
+  name: tracker
+spec:
+  replicas: 1
+  image: ${TEST_APPLICATION_IMAGE}
+  imagePullPolicy: ${TEST_IMAGE_PULL_POLICY}
+  cluster: idrs-test
+  coherence:
+    storageEnabled: false
+    metrics:
+      enabled: true
+    management:
+      enabled: true
+  application:
+    main: com.oracle.coherence.idrs.TrackerMain
+  jvm:
+    memory:
+      maxRAM: 2g
+      maxHeapSize: 1g
+  env:
+    - name: COHERENCE_M
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 15
+  ports:
+    - name: management
+
+
+
+
+

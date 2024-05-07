@@ -1,0 +1,32 @@
+apiVersion: coherence.oracle.com/v1
+kind: Coherence
+metadata:
+  name: publisher
+spec:
+  replicas: 1
+  image: ${TEST_APPLICATION_IMAGE}
+  imagePullPolicy: ${TEST_IMAGE_PULL_POLICY}
+  cluster: idrs-test
+  coherence:
+    storageEnabled: false
+    management:
+      enabled: true
+  application:
+    main: com.oracle.coherence.idrs.PublisherMain
+  jvm:
+    memory:
+      maxRAM: 2g
+      maxHeapSize: 1g
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 15
+  ports:
+    - name: management
+  env:
+    - name: COHERENCE_TEST_PUBLISH_DELAY
+      value: "5000"
+
+
+
+
+
