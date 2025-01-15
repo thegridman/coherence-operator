@@ -2502,7 +2502,7 @@ endif
 # Update the Operator version and all references to the previous version
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: new-version
-new-version: ## Update the Operator Version (must be run with NEXT_VERSION=x.y.z specified)
+new-version: $(BUILD_PROPS) ## Update the Operator Version (must be run with NEXT_VERSION=x.y.z specified)
 	$(SED) 's/$(subst .,\.,$(VERSION))/$(NEXT_VERSION)/g' Makefile
 	$(SED) 's/$(subst .,\.,$(PREV_VERSION))/$(VERSION)/g' Makefile
 	find docs \( -name '*.adoc' -o -name '*.yaml' \) -exec $(SED) 's/$(subst .,\.,$(VERSION))/$(NEXT_VERSION)/g' {} +
@@ -2517,7 +2517,7 @@ GIT_BRANCH="version-update-$(VERSION)"
 GIT_LABEL="version-update"
 
 .PHONY: new-version-pr
-new-version-pr: ## Create a PR to update the version
+new-version-pr: $(BUILD_PROPS) ## Create a PR to update the version
 	git config user.email "action@github.com"
 	git config user.name "GitHub Action"
 	git checkout -b $(GIT_BRANCH)
