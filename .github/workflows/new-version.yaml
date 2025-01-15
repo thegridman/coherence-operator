@@ -1,0 +1,40 @@
+# Copyright 2025, Oracle Corporation and/or its affiliates.  All rights reserved.
+# Licensed under the Universal Permissive License v 1.0 as shown at
+# http://oss.oracle.com/licenses/upl.
+
+# ---------------------------------------------------------------------------
+# Coherence Operator GitHub Action to bump the version number
+# ---------------------------------------------------------------------------
+name: Update Version
+
+on:
+  workflow_dispatch:
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK
+      uses: oracle-actions/setup-java@v1
+      with:
+        website: oracle.com
+        release: 21
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: 1.22.x
+
+    - name: Update Version
+      shell: bash
+      run: |
+        make new-version
+        make new-version-pr
