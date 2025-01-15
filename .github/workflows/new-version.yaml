@@ -36,6 +36,5 @@ jobs:
     - name: Update Version
       shell: bash
       run: |
-        make manifests
         make new-version
         make new-version-pr
