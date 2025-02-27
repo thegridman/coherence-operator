@@ -60,8 +60,6 @@ const (
 	// StatusSelectorTemplate is the string template for a WKA service selector
 	StatusSelectorTemplate = LabelCoherenceCluster + "=%s," + LabelCoherenceDeployment + "=%s"
 
-	// AnnotationFeatureSuspend is the feature annotations
-	AnnotationFeatureSuspend = "com.oracle.coherence.operator/feature.suspend"
 	// AnnotationOperatorVersion is the Operator version annotations
 	AnnotationOperatorVersion = "com.oracle.coherence.operator/version"
 	// AnnotationIstioConfig is the Istio config annotation applied to Pods.

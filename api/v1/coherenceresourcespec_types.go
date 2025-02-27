@@ -982,10 +982,7 @@ func (in *CoherenceResourceSpec) CreateDefaultEnv(deployment CoherenceResource) 
 		corev1.EnvVar{Name: EnvVarCohHealthPort, Value: Int32ToString(in.GetHealthPort())},
 	)
 
-	ann := deployment.GetAnnotations()
-	if ann[AnnotationFeatureSuspend] == "true" {
-		env = append(env, corev1.EnvVar{Name: EnvVarCohIdentity, Value: deployment.GetName() + "@" + deployment.GetNamespace()})
-	}
+	env = append(env, corev1.EnvVar{Name: EnvVarCohIdentity, Value: deployment.GetName() + "@" + deployment.GetNamespace()})
 
 	stsSpec, found := deployment.GetStatefulSetSpec()
 	if found {

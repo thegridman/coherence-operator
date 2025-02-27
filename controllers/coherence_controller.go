@@ -17,6 +17,7 @@ import (
 	"github.com/oracle/coherence-operator/controllers/servicemonitor"
 	"github.com/oracle/coherence-operator/controllers/statefulset"
 	"github.com/oracle/coherence-operator/pkg/clients"
+	"github.com/oracle/coherence-operator/pkg/events"
 	"github.com/oracle/coherence-operator/pkg/operator"
 	"github.com/oracle/coherence-operator/pkg/probe"
 	"github.com/oracle/coherence-operator/pkg/rest"
@@ -256,9 +257,18 @@ func (in *CoherenceReconciler) Reconcile(ctx context.Context, request ctrl.Reque
 
 	// Ensure the version annotation is present (it should have been added by the web-hook, so this should be a no-op).
 	// The hash may not have been added if the Coherence resource was added/modified when the Operator was uninstalled.
-	if applied, err := in.ensureVersionAnnotationApplied(ctx, deployment); applied || err != nil {
+	applied, err := in.ensureVersionAnnotationApplied(ctx, deployment)
+	if err != nil {
+		// We failed to update the Coherence resource
+		in.GetEventRecorder().Eventf(deployment, coreV1.EventTypeWarning, reconciler.EventReasonFailed,
+			fmt.Sprintf("failed to ensure version annotation applied: %s", err.Error()))
+		return ctrl.Result{}, err
+	}
+	if applied {
 		// We updated the Coherence resource, so requeue the event
-		return ctrl.Result{Requeue: true}, err
+		in.GetEventRecorder().Eventf(deployment, coreV1.EventTypeNormal, reconciler.EventReasonUpdated,
+			fmt.Sprintf("applied version annotation"))
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	// process the secondary resources in the order they should be created
@@ -459,8 +469,9 @@ func (in *CoherenceReconciler) finalizeDeployment(ctx context.Context, c *coh.Co
 		} else {
 			// Do service suspension...
 			p := probe.CoherenceProbe{
-				Client: in.GetClient(),
-				Config: in.GetManager().GetConfig(),
+				Client:        in.GetClient(),
+				Config:        in.GetManager().GetConfig(),
+				EventRecorder: events.NewOwnedEventRecorder(c, in.GetEventRecorder()),
 			}
 			if p.SuspendServices(ctx, c, sts) == probe.ServiceSuspendFailed {
 				return fmt.Errorf("failed to suspend services")
