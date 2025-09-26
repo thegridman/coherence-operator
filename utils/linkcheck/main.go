@@ -527,6 +527,9 @@ func shouldRetryError(err error) bool {
 		// Retry on timeouts or temporary errors
 		return ne.Timeout() || ne.Temporary()
 	}
+	if err.Error() == "unexpected EOF" {
+		return true
+	}
 	// Conservative default: don't retry unknown permanent errors.
 	return false
 }
