@@ -1098,8 +1098,8 @@ catalog-prepare: opm $(TOOLS_BIN)/yq ## Build a catalog image (the bundle image 
 	$(OPM) generate dockerfile catalog
 	mkdir -p $(BUILD_OUTPUT)/catalog || true
 	cp $(SCRIPTS_DIR)/olm/catalog-template.yaml $(BUILD_OUTPUT)/catalog/catalog-template.yaml
-	yq -i e 'select(.schema == "olm.template.basic").entries[] |= select(.schema == "olm.channel" and .name == "stable").entries += [{"name" : "coherence-operator.v$(VERSION)", "replaces": "coherence-operator.v$(PREV_VERSION)"}]' $(BUILD_OUTPUT)/catalog/catalog-template.yaml
-	yq -i e 'select(.schema == "olm.template.basic").entries += [{"schema" : "olm.bundle", "image": "$(BUNDLE_IMAGE)"}]' $(BUILD_OUTPUT)/catalog/catalog-template.yaml
+	$(YQ) -i e 'select(.schema == "olm.template.basic").entries[] |= select(.schema == "olm.channel" and .name == "stable").entries += [{"name" : "coherence-operator.v$(VERSION)", "replaces": "coherence-operator.v$(PREV_VERSION)"}]' $(BUILD_OUTPUT)/catalog/catalog-template.yaml
+	$(YQ) -i e 'select(.schema == "olm.template.basic").entries += [{"schema" : "olm.bundle", "image": "$(BUNDLE_IMAGE)"}]' $(BUILD_OUTPUT)/catalog/catalog-template.yaml
 	$(OPM) alpha render-template basic -o yaml $(BUILD_OUTPUT)/catalog/catalog-template.yaml > catalog/operator.yaml
 	$(OPM) validate catalog
 	$(DOCKER_CMD) build --load -f catalog.Dockerfile -t $(CATALOG_IMAGE) .
@@ -3080,7 +3080,7 @@ package-dashboards: ## package the Grafana and Kibana dashboards
 # Update the Operator version and all references to the previous version
 # ----------------------------------------------------------------------------------------------------------------------
 .PHONY: new-version
-new-version: ## Update the Operator Version (must be run with NEXT_VERSION=x.y.z specified)
+new-version: $(TOOLS_BIN)/yq ## Update the Operator Version (must be run with NEXT_VERSION=x.y.z specified)
 	$(SED) 's/$(subst .,\.,$(VERSION))/$(NEXT_VERSION)/g' Makefile
 	$(SED) 's/$(subst .,\.,$(PREV_VERSION))/$(VERSION)/g' Makefile
 	$(SED) 's/$(subst .,\.,$(PREV_VERSION))/$(VERSION)/g' config/manifests/bases/coherence-operator.clusterserviceversion.yaml
@@ -3091,8 +3091,8 @@ new-version: ## Update the Operator Version (must be run with NEXT_VERSION=x.y.z
 	find config \( -name '*.yaml' -o -name '*.json' \) -exec $(SED) 's/$(subst .,\.,$(VERSION))/$(NEXT_VERSION)/g' {} +
 	find helm-charts \( -name '*.yaml' -o -name '*.json' \) -exec $(SED) 's/$(subst .,\.,$(VERSION))/$(NEXT_VERSION)/g' {} +
 	$(SED) -e 's/<revision>$(subst .,\.,$(VERSION))<\/revision>/<revision>$(NEXT_VERSION)<\/revision>/g' java/pom.xml
-	yq -i e 'select(.schema == "olm.template.basic").entries[] |= select(.schema == "olm.channel" and .name == "stable").entries += [{"name" : "coherence-operator.v$(VERSION)", "replaces": "coherence-operator.v$(PREV_VERSION)"}]' $(SCRIPTS_DIR)/olm/catalog-template.yaml
-	yq -i e 'select(.schema == "olm.template.basic").entries += [{"schema" : "olm.bundle", "image": "$(GITHUB_REGISTRY)/$(OPERATOR_IMAGE_NAME)-bundle:$(OPERATOR_IMAGE_TAG)"}]' $(SCRIPTS_DIR)/olm/catalog-template.yaml
+	$(YQ) -i e 'select(.schema == "olm.template.basic").entries[] |= select(.schema == "olm.channel" and .name == "stable").entries += [{"name" : "coherence-operator.v$(VERSION)", "replaces": "coherence-operator.v$(PREV_VERSION)"}]' $(SCRIPTS_DIR)/olm/catalog-template.yaml
+	$(YQ) -i e 'select(.schema == "olm.template.basic").entries += [{"schema" : "olm.bundle", "image": "$(GITHUB_REGISTRY)/$(OPERATOR_IMAGE_NAME)-bundle:$(OPERATOR_IMAGE_TAG)"}]' $(SCRIPTS_DIR)/olm/catalog-template.yaml
 
 GIT_NEXT_BRANCH = "set-version-$(NEXT_VERSION)"
 GIT_LABEL       = "version-update"
